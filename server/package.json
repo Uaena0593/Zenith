@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server",
+    "dev": "nodemon server"
+  },
+  "author": "Jonathan Chen",
+  "license": "ISC",
+  "dependencies": {
+    "bip32": "^4.0.0",
+    "bitcoinjs-lib": "^6.1.5",
+    "bitcore-lib": "^10.0.23",
+    "bitcore-mnemonic": "^10.0.23",
+    "browserify": "^17.0.0",
+    "cors": "^2.8.5",
+    "ecpair": "^2.1.0",
+    "express": "^4.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
