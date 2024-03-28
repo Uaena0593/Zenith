@@ -21,6 +21,8 @@
     "bitcore-lib": "^10.0.23",
     "bitcore-mnemonic": "^10.0.23",
     "browserify": "^17.0.0",
+    "cookie": "^0.6.0",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ecpair": "^2.1.0",

@@ -38,11 +38,11 @@ const NavBar = () => {
   return (
     <>
       <nav className="sticky mt-5 z-20 mb-5 flex justify-between items-center bg-transparent px-48 py-2">
-        <div className = "flex flex-row space-x-10 text-white">
+        <div className = "flex flex-row space-x-10 text-black ">
           <a href="/">chen</a>
           <ul className="flex flex-row space-x-12">
             <li>
-              <Link href = "/creator">Creator</Link>
+              <Link href = "/creator">My wallet</Link>
             </li>
             <li>
               <Link href="/register">Resources</Link>
@@ -50,13 +50,13 @@ const NavBar = () => {
           </ul>
         </div>
         <div className = "flex items-center">
-          <ul className="flex flex-row space-x-10 items-center  text-white">
+          <ul className="flex flex-row space-x-10 items-center  text-black">
             {!authenticated ? (
                 <>
                   <li>
                     <Link
                       href="/register"
-                      className="px-6 py-2 bg-white bg-opacity-25 text-white rounded-2xl hover:bg-opacity-50 hover:text-white transition duration-300"
+                      className="px-6 py-2 bg-black bg-opacity-80 text-white rounded-2xl hover:bg-opacity-50 hover:text-white transition duration-300"
                     >
                       Register
                     </Link>
@@ -71,9 +71,9 @@ const NavBar = () => {
                     <Link
                     onClick = { logout }
                     href = "/"
-                    className="items-center justify-content px-6 py-2 mt-3 bg-white bg-opacity-25 text-white rounded-2xl hover:bg-opacity-50 hover:text-white transition duration-300"
+                    className="items-center justify-content px-6 py-2 mt-3 bg-black bg-opacity-80 text-white rounded-2xl hover:bg-opacity-50 hover:text-white transition duration-300"
                     >
-                      Logout
+                      My account
                     </Link>
                   </li>
                 </>

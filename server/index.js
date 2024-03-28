@@ -2,25 +2,30 @@ const express = require('express');
 const cors = require('cors');
 const Mnemonic = require('bitcore-mnemonic');
 const ecc = require('tiny-secp256k1');
-const assert = require('assert')
+const assert = require('assert');
 const app = express();
-const bip39 = require('bip39')
-const { BIP32Factory } = require('bip32')
+const bip39 = require('bip39');
+const { BIP32Factory } = require('bip32');
 const bip32 = BIP32Factory(ecc)
 const bitcoin = require('bitcoinjs-lib');
 const axios = require('axios');
-const { login, postReq, authenticateToken } = require('./authentication/authentication')
-const mysql = require('mysql')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const { registerRoute, loginRoute, authenticateToken, holyPoggers } = require('./authentication/authRoutes');
+
 
 require('dotenv').config();
 
 const stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
-
-
 app.use(express.json())
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true, 
+};
+app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const PORT = 8000;
 const connection = mysql.createConnection({
@@ -30,6 +35,21 @@ const connection = mysql.createConnection({
     database: 'btcwallet'
 });
 
+//user registration
+app.post('/register', registerRoute);
+//user login
+app.post('/login', loginRoute);
+
+app.get('/authenticateToken', authenticateToken, holyPoggers);
+
+app.get('/protected-route', authenticateToken, (req, res) => {
+    res.status('This is a protected route');
+});
+
+app.get('/logout', async (req, res) => {
+  res.cookie('accessToken', '', { expires: new Date(0), httpOnly: true, sameSite: 'strict' });
+  res.send('Logged out');
+});
 connection.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL: ' + err.stack);
@@ -39,7 +59,6 @@ connection.connect((err) => {
 });
 
 
-//creating the recovery mnemonic key`
 app.get('/recovery', async (req, res) => {
     try{
         const { passphrase } = req.query;
@@ -91,71 +110,6 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 })
 
-//middleware for verification
-function verifyToken(req, res, next) {
-    const token = req.headers['authorization'];
-
-    if (!token) {
-        return res.status(403).send('Access denied. No token provided.');
-    }
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if (err) {
-            console.error(err);
-            return res.status(401).send('Invalid token.');
-        }
-        req.user = decoded;
-        next();
-    });
-}
-
-app.post('/register', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        connection.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).send('Error registering user');
-            }
-            res.status(201).send('User registered successfully');
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error registering user');
-    }
-});
-
-
-
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    connection.query('SELECT * FROM users WHERE username = ?', [username], async (error, results) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).send('Server error');
-        }
-        if (results.length === 0) {
-            return res.status(401).send('Invalid username or password');
-        }
-
-        const user = results[0];
-        try {
-            if (await bcrypt.compare(password, user.password)) {
-                const accessToken = jwt.sign({ username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-                res.json({ accessToken });
-            } else {
-                return res.status(401).send('Invalid username or password');
-            }
-        } catch (error) {
-            console.error(error);
-            return res.status(500).send('Server error');
-        }
-    });
-});
-
-app.get('/posts', authenticateToken, postReq)
 
 app.get('/createKeys', async (req, res) => {
     const { xpriv, numKeys, rootPrivateKey } = req.query;
