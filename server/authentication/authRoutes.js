@@ -5,7 +5,6 @@ const mysql = require('mysql');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 
-
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -74,8 +73,8 @@ const loginRoute = async (req, res) => {
     try {
         if (await bcrypt.compare(password, user.password)) {
             const accessToken = generateAccessToken(username);
-            res.cookie('accessToken', accessToken, { httpOnly: true });
-            res.json({ accessToken });
+            res.cookie('accessToken', accessToken, { path: '/', httpOnly: true,sameSite: 'strict', });
+            res.status(201).json({ accessToken });
         } else {
             return res.status(401).send('Invalid username or password');
         }

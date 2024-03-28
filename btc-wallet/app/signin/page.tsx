@@ -1,10 +1,12 @@
 'use client';
+import { useRouter } from "next/navigation";
 import React, { useState } from 'react'
 import axios from 'axios'
 
 const SignIn = () => {
-const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const router = useRouter();
 
     const signIn = async (e) => {
         e.preventDefault();
@@ -12,8 +14,10 @@ const [password, setPassword] = useState("");
         const response = await axios.post('http://localhost:8000/login', {
             username,
             password,
-        });
-        console.log(response.data);
+        }, { withCredentials: true });
+        if (response.status === 201) {
+            router.push('/landingpage')
+        };
         } catch (error) {
         console.log(error);
         }
