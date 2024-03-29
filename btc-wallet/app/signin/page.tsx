@@ -1,13 +1,22 @@
 'use client';
 import { useRouter } from "next/navigation";
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
 const SignIn = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
-
+    useEffect(() => {
+        const checkAuth = async () => {
+          const response = await axios.get("http://localhost:8000/authenticateToken", {withCredentials: true});
+          if (response.data == "authenticated") {
+            router.push('/landingpage')
+          }
+        };
+        
+        checkAuth();
+      }, []);
     const signIn = async (e) => {
         e.preventDefault();
         try {

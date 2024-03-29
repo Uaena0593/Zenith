@@ -18,9 +18,9 @@ function generateAccessToken(username) {
 function holyPoggers(req, res) {
     res.json('HOLY POGGERS')
 }
-function authenticateToken(req, res, next) {
-    console.log('poggers');
+function authenticateToken(req, res) {
     console.log('All Cookies:', req.cookies);
+    console.log(req.cookies.accessToken)
     const token = req.cookies.accessToken;
 
     if (!token) {
@@ -29,7 +29,23 @@ function authenticateToken(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        console.log('pog')
+        res.json("authenticated")
+    } catch (err) {
+        return res.status(403).send('Invalid token');
+    }
+}
+
+function authenticateTokenMiddleware(req, res, next) {
+    console.log('All Cookies:', req.cookies);
+    console.log(req.cookies.accessToken)
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+        return res.status(401).send('Access token not found');
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.user = decoded;
         next()
     } catch (err) {

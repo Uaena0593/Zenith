@@ -11,7 +11,7 @@ const NavBar = () => {
     try {
       console.log(document.cookie);
       const response = await axios.get("http://localhost:8000/authenticateToken", { withCredentials: true });
-      if (response.status === 200) {
+      if (response.data == "authenticated") {
         setAuthenticated(true);
       } else {
         setAuthenticated(false);
