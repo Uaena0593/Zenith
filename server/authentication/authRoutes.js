@@ -20,7 +20,7 @@ function holyPoggers(req, res) {
 }
 function authenticateToken(req, res) {
     console.log('All Cookies:', req.cookies);
-    console.log(req.cookies.accessToken)
+    console.log(req.cookies.accessToken);
     const token = req.cookies.accessToken;
 
     if (!token) {
@@ -76,6 +76,7 @@ const registerRoute = async (req, res) => {
 
 const loginRoute = async (req, res) => {
     const { username, password } = req.body;
+
     connection.query('SELECT * FROM users WHERE username = ?', [username], async (error, results) => {
     if (error) {
         console.error(error);

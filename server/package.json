@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "assert": "^2.1.0",
-    "axios": "^1.6.7",
+    "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
@@ -31,6 +31,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "npm": "^10.5.0",
+    "request": "^2.88.2",
     "stripe": "^14.21.0",
     "tiny-secp256k1": "^2.2.3"
   },

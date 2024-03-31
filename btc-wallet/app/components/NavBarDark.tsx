@@ -39,7 +39,7 @@ const NavBar = () => {
     <>
       <nav className="sticky mt-5 z-20 mb-5 flex justify-between items-center bg-transparent px-48 py-2">
         <div className = "flex flex-row space-x-10 text-black ">
-          <a href="/">chen</a>
+          <Link href = "/landingpage">chen</Link>
           <ul className="flex flex-row space-x-12">
             <li>
               <Link href = "/creator">My wallet</Link>

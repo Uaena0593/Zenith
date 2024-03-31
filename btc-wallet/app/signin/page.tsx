@@ -20,15 +20,15 @@ const SignIn = () => {
     const signIn = async (e) => {
         e.preventDefault();
         try {
-        const response = await axios.post('http://localhost:8000/login', {
-            username,
-            password,
-        }, { withCredentials: true });
-        if (response.status === 201) {
-            router.push('/landingpage')
-        };
+            const response = await axios.post('http://localhost:8000/login', {
+                username,
+                password,
+            }, { withCredentials: true });
+            if (response.status === 201) {
+                router.push('/landingpage')
+            };
         } catch (error) {
-        console.log(error);
+            console.log(error);
         }
     };
     return (

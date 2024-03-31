@@ -37,7 +37,7 @@ const CreateAccount = () => {
             <div className = "flex flex-col items-start mb-4">
                 <div className = 'text-black text-lg mt-16 mb-8'>chen</div>
                 <div className = 'bg-white border rounded-md p-12 w-96 h-96 box-shadow'>
-                    <div className = 'text-black text-xl mb-4'>Sign in to your account</div>
+                    <div className = 'text-black text-xl mb-4'>Enter your credentials</div>
                     <div>Username</div>
                     <form onSubmit={ register } className = 'flex flex-col items-center'>
                         <input

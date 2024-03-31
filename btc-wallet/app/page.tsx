@@ -20,15 +20,12 @@ const HomePage = () => {
         </div>
         <div className="flex flex-row justify-between max-w-4xl px-48 mt-16">
           <div className = "max-w-30">
-            <h1 className="text-7xl font-bold">Accessible online blockchain wallet</h1>
-            <p className="text-md mt-4 color-grey" style = {{lineHeight: 1.3}}>Access your cryptocurrency securely anytime, anywhere with our online blockchain wallet. Safeguard your digital assets and manage your transactions with ease, offering convenience and peace of mind</p>
+            <h1 className="text-7xl font-bold">Accessible online investment wallet</h1>
+            <p className="text-md mt-4 color-grey" style = {{lineHeight: 1.3}}>Access your investments securely anytime, anywhere with our online wallet. Safeguard your digital assets and manage your transactions with ease, offering convenience and peace of mind</p>
             <div className = "flex flex-row mt-3">
               <Link href="/register" className="inline-border px-4 py-2 bg-black bg-opacity-80 text-white rounded-2xl hover:bg-opacity-60 hover:text-white transition duration-300">Get Started &gt;</Link>
               <Link href="/register" className="inline-border px-4 py-2 ml-4 bg-transparent bg-opacity-80 text-black rounded-2xl hover:bg-opacity-60 hover:text-opacity-20 transition duration-300">About &gt;</Link>
             </div>
-          </div>
-          <div className="flex items-center flex-shrink-0">
-            <Image className = "ml-40 mb-10" alt = "blockchain" src = {blockchainPNG} width = {420} height = {420}></Image>
           </div>
         </div>
       </section>

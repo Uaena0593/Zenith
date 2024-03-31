@@ -14,6 +14,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { registerRoute, loginRoute, authenticateToken, holyPoggers } = require('./authentication/authRoutes');
+var request = require('request');
 
 
 require('dotenv').config();
@@ -33,6 +34,30 @@ const connection = mysql.createConnection({
     user: 'root',
     password: process.env.DATABASE_CONNECTION_PW,
     database: 'btcwallet'
+});
+
+app.get('/query-stock-data', async (req, res) => {
+  const { queryStockValue } = req.query;
+  const url = `https://financialmodelingprep.com/api/v3/search?query=${queryStockValue}&exchange=NASDAQ&apikey=${process.env.STOCK_PRIVATE_KEY}`;
+
+  try {
+    const searchResponse = await axios.get(url);
+    if (searchResponse.data && searchResponse.data.length > 0) {
+      const profileRequests = searchResponse.data.map(stock => 
+        axios.get(`https://financialmodelingprep.com/api/v3/profile/${stock.symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`)
+      );
+      const profileResponses = await Promise.all(profileRequests);
+      const profileData = profileResponses.map(response => response.data);
+
+      console.log(profileData);
+      res.send(profileData);
+    } else {
+      res.send([]);
+    }
+  } catch (error) {
+    console.error('error while fetching data', error);
+    res.status(500).send('failed to fetch data');
+  }
 });
 
 //user registration
