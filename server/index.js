@@ -48,8 +48,6 @@ app.get('/query-stock-data', async (req, res) => {
       );
       const profileResponses = await Promise.all(profileRequests);
       const profileData = profileResponses.map(response => response.data);
-
-      console.log(profileData);
       res.send(profileData);
     } else {
       res.send([]);
@@ -59,6 +57,17 @@ app.get('/query-stock-data', async (req, res) => {
     res.status(500).send('failed to fetch data');
   }
 });
+app.get('/get-symbol-information', async(req,res)=>{
+  const { symbol } = req.query
+  const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`
+  try {
+    const response = await axios.get(url)
+    console.log(response.data)
+  }catch (e) {
+    console.log(e)
+  }
+
+})
 
 //user registration
 app.post('/register', registerRoute);
