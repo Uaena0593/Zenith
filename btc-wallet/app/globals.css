@@ -15,6 +15,9 @@
 body {
   color: black;
 }
+title-font-size {
+  font-size: ;
+}
 
 @layer utilities {
   .text-balance {

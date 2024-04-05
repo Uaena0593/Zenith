@@ -5,14 +5,18 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
--- @block 
-
-
 -- @block
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Uaena_0516';
-
-
-
-
-
+CREATE TABLE portfolio (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    stock_symbol VARCHAR(10) NOT NULL,
+    purchase_date INT NOT NULL,
+    shares INT NOT NULL,
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id) 
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+-- @block
+DROP TABLE portfolio;
 

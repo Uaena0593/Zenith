@@ -18,10 +18,10 @@ const HomePage = () => {
           <div className="g4"></div>
           <div className="g5"></div>
         </div>
-        <div className="flex flex-row justify-between max-w-4xl px-48 mt-16">
-          <div className = "max-w-30">
-            <h1 className="text-7xl font-bold">Accessible online investment wallet</h1>
-            <p className="text-md mt-4 color-grey" style = {{lineHeight: 1.3}}>Access your investments securely anytime, anywhere with our online wallet. Safeguard your digital assets and manage your transactions with ease, offering convenience and peace of mind</p>
+        <div className="flex flex-row justify-between max-w-4xl sm:px-16 md:px-36 lg:px-40 xl:px-56 mt-16">
+          <div className = "sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg">
+            <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-7xl xl:text-8xl font-bold">Accessible online investment portfolio</h1>
+            <p className="text-lg mt-3 color-grey" style = {{lineHeight: 1.3}}>Access your investments securely anytime, anywhere with our online wallet. Safeguard your digital assets and manage your transactions with ease, offering convenience and peace of mind</p>
             <div className = "flex flex-row mt-3">
               <Link href="/register" className="inline-border px-4 py-2 bg-black bg-opacity-80 text-white rounded-2xl hover:bg-opacity-60 hover:text-white transition duration-300">Get Started &gt;</Link>
               <Link href="/register" className="inline-border px-4 py-2 ml-4 bg-transparent bg-opacity-80 text-black rounded-2xl hover:bg-opacity-60 hover:text-opacity-20 transition duration-300">About &gt;</Link>

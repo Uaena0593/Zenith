@@ -13,7 +13,7 @@ const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { registerRoute, loginRoute, authenticateToken, holyPoggers } = require('./authentication/authRoutes');
+const { registerRoute, loginRoute, authenticateToken, holyPoggers, authenticateTokenMiddleware } = require('./authentication/authRoutes');
 var request = require('request');
 
 
@@ -34,6 +34,69 @@ const connection = mysql.createConnection({
     user: 'root',
     password: process.env.DATABASE_CONNECTION_PW,
     database: 'btcwallet'
+});
+
+app.get('/add-to-portfolio', authenticateTokenMiddleware, (req, res) => {
+  const { username } = req.user;
+  const { numberOfShares, purchaseDate, symbol } = req.query;
+  
+  const userIdQuery = 'SELECT id FROM users WHERE username = ?';
+
+  // Using callback function
+  connection.query(userIdQuery, [username], (err, results) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'An error occurred' });
+      }
+
+      if (results.length === 0) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const userId = results[0].id;
+      const insertQuery = `
+          INSERT INTO portfolio (user_id, stock_symbol, purchase_date, shares)
+          VALUES (?, ?, ?, ?)
+      `;
+      // Inserting the new record
+      connection.query(insertQuery, [userId, symbol, purchaseDate, numberOfShares], (err, insertResult) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).json({ message: 'An error occurred during portfolio update' });
+          }
+          res.status(200).json({ message: 'Portfolio updated successfully' });
+      });
+  });
+});
+
+app.get('/fetch-portfolio', authenticateTokenMiddleware, (req, res) => {
+  const { username } = req.user;
+
+  // Step 1: Retrieve the user's user_id based on their username
+  const userIdQuery = 'SELECT id FROM users WHERE username = ?';
+  connection.query(userIdQuery, [username], (err, userResults) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'An error occurred while fetching the user' });
+      }
+
+      if (userResults.length === 0) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      const userId = userResults[0].id;
+
+      // Step 2: Query the portfolio table using the retrieved user_id
+      const portfolioQuery = 'SELECT * FROM portfolio WHERE user_id = ?';
+      connection.query(portfolioQuery, [userId], (err, portfolioResults) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).json({ message: 'An error occurred while fetching the portfolio' });
+          }
+
+          // Step 3: Send the retrieved portfolio entries back to the frontend
+          res.status(200).json(portfolioResults);
+      });
+  });
 });
 
 app.get('/query-stock-data', async (req, res) => {

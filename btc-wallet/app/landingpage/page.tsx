@@ -1,4 +1,4 @@
-
+'use client'
 import React, { useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
@@ -6,6 +6,7 @@ import NavBarDark from '../components/NavBarDark';
 import axios from 'axios'
 import StockAPI from '../components/StockAPI'
 import '../globals.css';
+import MyPortfolio from '../components/MyPortfolio';
 
 const HomePage = () => {
   return (
@@ -19,9 +20,10 @@ const HomePage = () => {
           <div className="g4"></div>
           <div className="g5"></div>
         </div>
-        <div className="flex flex-row justify-between max-w-4xl px-48 mt-4">
+        <div className="flex flex-row justify-between max-w-4xl sm:px-16 md:px-36 lg:px-40 xl:px-56 mt-4">
           <div className = "max-w-30">
             <h1 className="text-2xl font-bold mb-2">My portfolio</h1>
+            <MyPortfolio/>
             <StockAPI></StockAPI>
           </div>
         </div>

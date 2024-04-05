@@ -18,6 +18,7 @@ function generateAccessToken(username) {
 function holyPoggers(req, res) {
     res.json('HOLY POGGERS')
 }
+
 function authenticateToken(req, res) {
     console.log('All Cookies:', req.cookies);
     console.log(req.cookies.accessToken);
@@ -39,12 +40,12 @@ function authenticateTokenMiddleware(req, res, next) {
     console.log('All Cookies:', req.cookies);
     console.log(req.cookies.accessToken)
     const token = req.cookies.accessToken;
-
+    
     if (!token) {
         return res.status(401).send('Access token not found');
     }
-
     try {
+        console.log('checking')
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.user = decoded;
         next()
@@ -102,4 +103,4 @@ const loginRoute = async (req, res) => {
 });
 };
 
-module.exports = { registerRoute, loginRoute, authenticateToken, holyPoggers };
+module.exports = { registerRoute, loginRoute, authenticateToken, holyPoggers, authenticateTokenMiddleware };

@@ -16,4 +16,4 @@ const EditPortfolio = () => {
     )
 }
 
-export default EditPortfolio 
+export default EditPortfolio
