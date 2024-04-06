@@ -42,7 +42,7 @@ const NavBar = () => {
           <Link href = "/landingpage" >chen</Link>
           <ul className="flex flex-row space-x-12">
             <li>
-              <Link href = "/creator">Creator</Link>
+              <Link href = "/landingpage">My portfolio</Link>
             </li>
             <li>
               <Link href="/register">Resources</Link>

@@ -20,11 +20,6 @@ const StockAPI = () => {
   return (
     <>
       <section className="flex flex-row justify-between w-full">
-        <div className="">
-          <button className="items-center px-5 py-2 mt-3 text-md bg-gray-400 bg-opacity-80 text-white rounded-2xl hover:bg-opacity-50 hover:text-white transition duration-300">
-            Add Investment
-          </button>
-        </div>
         <form onSubmit={queryStock}>
           <input
             type="text"
@@ -32,7 +27,7 @@ const StockAPI = () => {
             onChange={(e) => {
               setQueryStockValue(e.target.value);
             }}
-            className="border mb-2 p-1 w-64 border-black rounded-md border-opacity-30"
+            className="border mb-2 p-2 right-box-width border-black rounded-md border-opacity-30"
             placeholder="Enter company symbol/name"
           ></input>
         </form>

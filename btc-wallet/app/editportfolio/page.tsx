@@ -10,7 +10,6 @@ const EditPortfolio = () => {
     return (
         <>
             <NavBarDark/>
-            <div>{search}</div>
             <AddInvestment query ={search} ></AddInvestment>
         </>
     )

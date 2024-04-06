@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useRouter } from "next/navigation";
 import altImage from '../public/image.png'
 import axios from 'axios'
-import NavBarDark from './NavBarDark';
 
 interface Props {
     query: string;
@@ -13,7 +12,6 @@ interface Props {
 const StockSearch = ({query}: Props) => {
     const [searchedQueryArray, setSearchedQueryArray] = useState([]);
     const [queryStockValue, setQueryStockValue] = useState("")
-    const router = useRouter();
 
     useEffect(()=>{
         const queryStockResult = async () => {
@@ -23,6 +21,7 @@ const StockSearch = ({query}: Props) => {
             const response = await axios.get("http://localhost:8000/query-stock-data", {
                 params: { queryStockValue: queryStockValue },
             });
+            console.log(response.data)
             setSearchedQueryArray(response.data)
         }
         queryStockResult()
@@ -36,9 +35,8 @@ const StockSearch = ({query}: Props) => {
     }
     return (
         <>
-
-          <NavBarDark></NavBarDark>
-          <section className = "">
+          <section className = "sm:pl-16 md:pl-36 lg:pl-40 xl:pl-56">
+            <div className = 'text-lg font-bold'>Search Company</div>
             <form onSubmit={queryStock}>
               <input
                   type="text"
@@ -46,15 +44,15 @@ const StockSearch = ({query}: Props) => {
                   onChange={(e) => {
                   setQueryStockValue(e.target.value);
                   }}
-                  className="border mb-2 p-1 w-64 border-black rounded-md border-opacity-30"
+                  className="border mt-2 mb-2 p-1 h-10 border-black rounded-md border-opacity-30 search-bar-width "
                   placeholder="Enter company symbol/name"
               ></input>
             </form>
-            <div className="h-96 overflow-y-auto w-80">
+            <div className="overflow-y-auto flex flex-col search-result-box">
               {searchedQueryArray.map((item, index) => (
                 <div
                   key={index}
-                  className="flex flex-row space-x-2 border border-grey-400 rounded-xl px-3 items-center h-10 w-64 justify-between"
+                  className="flex flex-row space-x-2 h-16 search-result justify-start bg-white border border-grey-400 rounded-xl px-8 items-center justify-between"
                 >
                   <div className="flex flex-row items-center space-x-2">
                     <img
@@ -62,7 +60,7 @@ const StockSearch = ({query}: Props) => {
                       alt={altImage}
                       className="h-10 w-10"
                     />
-                    <div>{item[0].symbol}</div>
+                    <div className = "pl-3">{item[0].symbol}</div>
                   </div>
                   <div className="">
                     {item[0].price} {item[0].currency}
@@ -70,7 +68,7 @@ const StockSearch = ({query}: Props) => {
                   <Link href={{
                     pathname: '/editportfolio',
                     query: { symbol: item[0].symbol },
-                  }}>hallo</Link>
+                  }}>add</Link>
                 </div>
               ))}
             </div>

@@ -36,13 +36,29 @@ const connection = mysql.createConnection({
     database: 'btcwallet'
 });
 
-app.get('/add-to-portfolio', authenticateTokenMiddleware, (req, res) => {
-  const { username } = req.user;
-  const { numberOfShares, purchaseDate, symbol } = req.query;
-  
-  const userIdQuery = 'SELECT id FROM users WHERE username = ?';
+app.get('/testing', async (req, res)=>{
+  try{
+    const {stockBuyDate} = req.query
+    console.log(stockBuyDate)
+    const specificDate = '2024-04-04 14:21:00';
+    const response = await axios.get(`https://financialmodelingprep.com/api/v3/historical-chart/1min/NVDA?from=2024-04-04&to=2024-04-04&apikey=${process.env.STOCK_PRIVATE_KEY}`)
+    const entry = response.data.find(item => item.date === specificDate);
+    console.log(entry)
 
-  // Using callback function
+  } catch(e) {
+    console.log(e)
+  }
+});
+
+app.get('/add-to-portfolio', authenticateTokenMiddleware, async (req, res) => {
+  const { username } = req.user;
+  const { numberOfShares, purchaseDate, purchaseTime, symbol } = req.query;
+  const url = `https://financialmodelingprep.com/api/v3/historical-chart/1min/${symbol}?from=${purchaseDate}&to=${purchaseDate}&apikey=${process.env.STOCK_PRIVATE_KEY}`
+  const response = await axios.get(url)
+  const specificDate = `${purchaseDate} ${purchaseTime}:00`;
+  const entry = response.data.find(item => item.date === specificDate);
+  console.log(entry)
+  const userIdQuery = 'SELECT id FROM users WHERE username = ?';
   connection.query(userIdQuery, [username], (err, results) => {
       if (err) {
           console.error(err);
@@ -55,11 +71,11 @@ app.get('/add-to-portfolio', authenticateTokenMiddleware, (req, res) => {
 
       const userId = results[0].id;
       const insertQuery = `
-          INSERT INTO portfolio (user_id, stock_symbol, purchase_date, shares)
-          VALUES (?, ?, ?, ?)
+          INSERT INTO portfolio (user_id, stock_symbol, purchase_date, purchase_time, buy_price, shares)
+          VALUES (?, ?, ?, ?, ?, ?)
       `;
       // Inserting the new record
-      connection.query(insertQuery, [userId, symbol, purchaseDate, numberOfShares], (err, insertResult) => {
+      connection.query(insertQuery, [userId, symbol, purchaseDate, purchaseTime, entry.low, numberOfShares], (err, insertResult) => {
           if (err) {
               console.error(err);
               return res.status(500).json({ message: 'An error occurred during portfolio update' });
@@ -71,31 +87,20 @@ app.get('/add-to-portfolio', authenticateTokenMiddleware, (req, res) => {
 
 app.get('/fetch-portfolio', authenticateTokenMiddleware, (req, res) => {
   const { username } = req.user;
+  const query = `
+    SELECT p.id, p.stock_symbol, p.purchase_date, p.purchase_time, p.buy_price, p.shares
+    FROM users u
+    JOIN portfolio p ON u.id = p.user_id
+    WHERE u.username = ?
+  `;
 
-  // Step 1: Retrieve the user's user_id based on their username
-  const userIdQuery = 'SELECT id FROM users WHERE username = ?';
-  connection.query(userIdQuery, [username], (err, userResults) => {
-      if (err) {
-          console.error(err);
-          return res.status(500).json({ message: 'An error occurred while fetching the user' });
-      }
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error('Error fetching portfolio:', err);
+      return res.status(500).json({ message: 'Error fetching portfolio' });
+    }
 
-      if (userResults.length === 0) {
-          return res.status(404).json({ message: 'User not found' });
-      }
-      const userId = userResults[0].id;
-
-      // Step 2: Query the portfolio table using the retrieved user_id
-      const portfolioQuery = 'SELECT * FROM portfolio WHERE user_id = ?';
-      connection.query(portfolioQuery, [userId], (err, portfolioResults) => {
-          if (err) {
-              console.error(err);
-              return res.status(500).json({ message: 'An error occurred while fetching the portfolio' });
-          }
-
-          // Step 3: Send the retrieved portfolio entries back to the frontend
-          res.status(200).json(portfolioResults);
-      });
+    res.json(results);
   });
 });
 
@@ -125,7 +130,6 @@ app.get('/get-symbol-information', async(req,res)=>{
   const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`
   try {
     const response = await axios.get(url)
-    console.log(response.data)
   }catch (e) {
     console.log(e)
   }
