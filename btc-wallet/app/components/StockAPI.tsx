@@ -28,7 +28,7 @@ const StockAPI = () => {
               setQueryStockValue(e.target.value);
             }}
             className="border mb-2 p-2 right-box-width border-black rounded-md border-opacity-30"
-            placeholder="Enter company symbol/name"
+            placeholder="Search for company by symbol or name"
           ></input>
         </form>
       </section>

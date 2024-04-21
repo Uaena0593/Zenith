@@ -9,11 +9,13 @@ const StockSearchPage = ({ params }: { params: { id : string } }) => {
   return (
     <>
       <section className = 'ow-background'>
-        <NavBarDark />
-        <div className = 'flex flex-row mt-8'>
-          <StockSearch query ={params.id}/>
-          <div className = 'ml-4'>
-            <Watchlist></Watchlist>
+        <div className = 'sm:px-16 md:px-36 lg:px-40 xl:px-56 flex flex-col'>
+          <NavBarDark />
+          <div className = 'flex flex-row mt-2'>
+            <StockSearch query ={params.id}/>
+            <div className = 'ml-4'>
+              <Watchlist></Watchlist>
+            </div>
           </div>
         </div>
       </section>

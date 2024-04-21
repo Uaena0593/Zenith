@@ -9,7 +9,6 @@ const NavBar = () => {
   const router = useRouter();
   const checkAuthentication = async () => {
     try {
-      console.log(document.cookie);
       const response = await axios.get("http://localhost:8000/authenticateToken", { withCredentials: true });
       if (response.status === 200) {
         setAuthenticated(true);
@@ -37,7 +36,7 @@ const NavBar = () => {
   };
   return (
     <>
-      <nav className="mt-5 z-20 mb-5 flex justify-between items-center bg-transparent sm:px-16 md:px-36 lg:px-40 xl:px-56 py-2">
+      <nav className="mt-5 z-20 mb-5 flex justify-between items-center bg-transparent py-2">
         <div className = "flex flex-row space-x-10 text-black ">
           <Link href = "/landingpage">chen</Link>
           <ul className="flex flex-row space-x-12">

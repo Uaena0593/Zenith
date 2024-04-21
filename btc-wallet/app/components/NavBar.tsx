@@ -37,9 +37,9 @@ const NavBar = () => {
   };
   return (
     <>
-      <nav className="sticky mt-5 z-20 mb-5 flex justify-between items-center bg-transparent sm:px-16 md:px-36 lg:px-40 xl:px-56 py-2">
+      <nav className="sticky mt-5 z-20 mb-5 flex justify-between items-center bg-transparent py-2">
         <div className = "flex flex-row space-x-10 text-white">
-          <Link href = "/landingpage" >chen</Link>
+          <Link href = "/landingpage">chen</Link>
           <ul className="flex flex-row space-x-12">
             <li>
               <Link href = "/landingpage">My portfolio</Link>

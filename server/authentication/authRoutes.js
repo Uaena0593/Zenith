@@ -1,9 +1,7 @@
-const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql');
 require('dotenv').config();
-const cookieParser = require('cookie-parser');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -13,17 +11,11 @@ const connection = mysql.createConnection({
 });
 
 function generateAccessToken(username) {
-    return jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-}
-function holyPoggers(req, res) {
-    res.json('HOLY POGGERS')
+    return jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' });
 }
 
 function authenticateToken(req, res) {
-    console.log('All Cookies:', req.cookies);
-    console.log(req.cookies.accessToken);
     const token = req.cookies.accessToken;
-
     if (!token) {
         return res.status(401).send('Access token not found');
     }
@@ -36,23 +28,7 @@ function authenticateToken(req, res) {
     }
 }
 
-function authenticateTokenMiddleware(req, res, next) {
-    console.log('All Cookies:', req.cookies);
-    console.log(req.cookies.accessToken)
-    const token = req.cookies.accessToken;
-    
-    if (!token) {
-        return res.status(401).send('Access token not found');
-    }
-    try {
-        console.log('checking')
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user = decoded;
-        next()
-    } catch (err) {
-        return res.status(403).send('Invalid token');
-    }
-}
+
 
 const registerRoute = async (req, res) => {
     try {
@@ -100,7 +76,7 @@ const loginRoute = async (req, res) => {
         console.error(error);
         return res.status(500).send('Server error');
     }
-});
+    });
 };
 
-module.exports = { registerRoute, loginRoute, authenticateToken, holyPoggers, authenticateTokenMiddleware };
+module.exports = { registerRoute, loginRoute, authenticateToken};

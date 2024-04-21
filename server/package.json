@@ -14,16 +14,10 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@mui/material": "^5.15.15",
     "antd": "^5.16.1",
-    "assert": "^2.1.0",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
-    "bip32": "^4.0.0",
-    "bip39": "^3.1.0",
-    "bitcoinjs-lib": "^6.1.5",
     "bitcore-lib": "^10.0.23",
-    "bitcore-mnemonic": "^10.0.23",
     "browserify": "^17.0.0",
     "cookie": "^0.6.0",
     "cookie-parser": "^1.4.6",
@@ -36,9 +30,9 @@
     "moment-timezone": "^0.5.45",
     "mysql": "^2.18.1",
     "npm": "^10.5.0",
+    "redis": "^4.6.13",
     "request": "^2.88.2",
-    "stripe": "^14.21.0",
-    "tiny-secp256k1": "^2.2.3"
+    "stripe": "^14.21.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

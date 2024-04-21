@@ -19,6 +19,14 @@ CREATE TABLE portfolio (
         REFERENCES users(id)
         ON DELETE CASCADE
 );
+
+--@block
+create TABLE watchlist (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    stock_symbol VARCHAR(10) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 -- @block
-DROP TABLE portfolio;
+DROP TABLE watchlist;
 

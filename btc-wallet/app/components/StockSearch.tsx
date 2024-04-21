@@ -35,7 +35,7 @@ const StockSearch = ({query}: Props) => {
     }
     return (
         <>
-          <section className = "sm:pl-16 md:pl-36 lg:pl-40 xl:pl-56">
+          <section className = "">
             <div className = 'text-lg font-bold'>Search Company</div>
             <form onSubmit={queryStock}>
               <input
@@ -52,7 +52,7 @@ const StockSearch = ({query}: Props) => {
               {searchedQueryArray.map((item, index) => (
                 <div
                   key={index}
-                  className="flex flex-row space-x-2 h-16 search-result justify-start bg-white border border-grey-400 rounded-xl px-8 items-center justify-between"
+                  className="flex flex-row space-x-2 h-16 search-result-1 mb-2 bg-white border border-gray-400 rounded-xl px-8 items-center justify-between"
                 >
                   <div className="flex flex-row items-center space-x-2">
                     <img
@@ -62,13 +62,14 @@ const StockSearch = ({query}: Props) => {
                     />
                     <div className = "pl-3">{item[0].symbol}</div>
                   </div>
-                  <div className="">
-                    {item[0].price} {item[0].currency}
+                  <div className="flex flex-row text-left items-center">
+                    <div className = ''>${item[0].price} </div>
+                    <div className = 'text-sm ml-1 text-gray-500'>{item[0].currency}</div>
                   </div>
-                  <Link href={{
+                  <Link className = 'text-3xl text-gray-500' href={{
                     pathname: '/editportfolio',
                     query: { symbol: item[0].symbol },
-                  }}>add</Link>
+                  }}>+</Link>
                 </div>
               ))}
             </div>

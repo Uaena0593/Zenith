@@ -1,30 +1,34 @@
 const express = require('express');
 const cors = require('cors');
-const Mnemonic = require('bitcore-mnemonic');
-const ecc = require('tiny-secp256k1');
-const assert = require('assert');
-const app = express();
-const bip39 = require('bip39');
-const { BIP32Factory } = require('bip32');
-const bip32 = BIP32Factory(ecc)
-const bitcoin = require('bitcoinjs-lib');
 const axios = require('axios');
 const mysql = require('mysql');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const redis = require('redis')
 const cookieParser = require('cookie-parser');
-const { registerRoute, loginRoute, authenticateToken, holyPoggers, authenticateTokenMiddleware } = require('./authentication/authRoutes');
-var request = require('request');
+const { fetchPortfolioData } = require('./services/graphData')
+const { registerRoute, loginRoute, authenticateToken } = require('./authentication/authRoutes');
+const { authenticateTokenMiddleware } = require('./middleware/auth/authMiddleware')
 
-
+const app = express();
 require('dotenv').config();
 
-const stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
+const client = redis.createClient({
+  host: 'localhost',
+  port: 8000
+});
+
+client.on('connect', () => {
+  console.log('Redis client connected to the server');
+});
+
+client.on('error', (err) => console.log('Redis Client Error', err));
+client.connect();
+
 app.use(express.json())
 const corsOptions = {
   origin: 'http://localhost:3000',
   credentials: true, 
 };
+
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
@@ -35,29 +39,131 @@ const connection = mysql.createConnection({
     password: process.env.DATABASE_CONNECTION_PW,
     database: 'btcwallet'
 });
+app.get('/check-portfolio', authenticateTokenMiddleware, async (req,res) => {
+  try {
+    const users = await new Promise((resolve, reject) => {
+      const userQuery = `SELECT id FROM users WHERE username = ?`;
+      connection.query(userQuery, [req.user.username], (err, results) => {
+          if (err) return reject(err);
+          resolve(results);
+      });
+    });
 
-app.get('/testing', async (req, res)=>{
-  try{
-    const {stockBuyDate} = req.query
-    console.log(stockBuyDate)
-    const specificDate = '2024-04-04 14:21:00';
-    const response = await axios.get(`https://financialmodelingprep.com/api/v3/historical-chart/1min/NVDA?from=2024-04-04&to=2024-04-04&apikey=${process.env.STOCK_PRIVATE_KEY}`)
-    const entry = response.data.find(item => item.date === specificDate);
-    console.log(entry)
+    if (users.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+    }
 
+    const user = users[0];
+    const portfolio = await new Promise((resolve, reject) => {
+        const portfolioQuery = `SELECT stock_symbol, shares FROM portfolio WHERE user_id = ?`;
+        connection.query(portfolioQuery, [user.id], (err, results) => {
+            if (err) return reject(err);
+            resolve(results);
+        });
+    });
+
+    if (portfolio.length === 0) {
+        return res.status(404).json({ message: 'Portfolio not found' });
+    }
+    } catch (e) {
+      console.log(e)
+    }
+
+})
+
+app.get('/fetch-stock-chart', authenticateTokenMiddleware, async (req, res)=> {
+  const { queryStockSymbol } = req.query
+  try {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const lastDate = today.toISOString().substring(0, 10);
+    const firstDate = thirtyDaysAgo.toISOString().substring(0, 10);
+    const datesArray = [];
+
+    for (let currentDate = new Date(thirtyDaysAgo); currentDate <= today; currentDate.setDate(currentDate.getDate() + 1)) {
+      datesArray.push({
+        date: currentDate.toISOString().substring(0, 10),
+        value: 0
+      });
+    }
+    const response = await axios.get(`https://financialmodelingprep.com/api/v3/historical-price-full/${queryStockSymbol}?from=${firstDate}&to=${lastDate}&apikey=${process.env.STOCK_PRIVATE_KEY}`)
+    const data = response.data.historical;
+    console.log(data)
+    datesArray.forEach(dataItem => {
+      const matchingStock = data.find(stockItem => stockItem.date === dataItem.date);
+      if (matchingStock) {
+        dataItem.value = matchingStock.open
+        dataItem.value = Number(dataItem.value.toFixed(2));
+      }
+    });
+    let firstNonZeroValue = null;
+
+    for (let dataItem of datesArray) {
+      if (dataItem.value !== 0) {
+        firstNonZeroValue = dataItem.value;
+        break;
+      }
+    }
+
+    if (firstNonZeroValue !== null) {
+      for (let dataItem of datesArray) {
+        if (dataItem.value === 0) {
+          dataItem.value = firstNonZeroValue;
+        } else {
+          break;
+        }
+      }
+    }
+
+    let lastNonZeroValue = firstNonZeroValue;
+
+    for (let dataItem of datesArray) {
+      if (dataItem.value === 0) {
+        dataItem.value = lastNonZeroValue;
+      } else {
+        lastNonZeroValue = dataItem.value;
+      }
+    }
+    res.json(datesArray)
   } catch(e) {
     console.log(e)
   }
-});
+})
+
+app.get('/fetch-myportfolio-data', authenticateTokenMiddleware, fetchPortfolioData);
+
+app.get('/update-buy-price', async (req, res) => {
+  const {numberOfShares, purchaseDate, purchaseTime, symbol} = req.query
+  try {
+    const url = `https://financialmodelingprep.com/api/v3/historical-chart/1min/${symbol}?from=${purchaseDate}&to=${purchaseDate}&apikey=${process.env.STOCK_PRIVATE_KEY}`
+    const response = await axios.get(url)
+    const specificDate = `${purchaseDate} ${purchaseTime}:00`;
+    const entry = response.data.find(item => item.date === specificDate);
+    console.log(entry.low)
+    console.log('working')
+    const pogger = Number(numberOfShares)
+    const pogger1 = Number(entry.low)
+    const returnValue = pogger1*pogger
+    res.json(returnValue);
+  } catch(e) {
+    console.log(e)
+  }
+})
+
 
 app.get('/add-to-portfolio', authenticateTokenMiddleware, async (req, res) => {
   const { username } = req.user;
-  const { numberOfShares, purchaseDate, purchaseTime, symbol } = req.query;
+  const { numberOfShares, purchaseDate, purchaseTime, symbol, addToWatchlist } = req.query;
+ 
   const url = `https://financialmodelingprep.com/api/v3/historical-chart/1min/${symbol}?from=${purchaseDate}&to=${purchaseDate}&apikey=${process.env.STOCK_PRIVATE_KEY}`
   const response = await axios.get(url)
   const specificDate = `${purchaseDate} ${purchaseTime}:00`;
   const entry = response.data.find(item => item.date === specificDate);
-  console.log(entry)
+  if (!entry) {
+    return res.status(404).json({ message: 'No stock data found for the specified date and time' });
+  }
+
   const userIdQuery = 'SELECT id FROM users WHERE username = ?';
   connection.query(userIdQuery, [username], (err, results) => {
       if (err) {
@@ -70,22 +176,74 @@ app.get('/add-to-portfolio', authenticateTokenMiddleware, async (req, res) => {
       }
 
       const userId = results[0].id;
-      const insertQuery = `
-          INSERT INTO portfolio (user_id, stock_symbol, purchase_date, purchase_time, buy_price, shares)
-          VALUES (?, ?, ?, ?, ?, ?)
-      `;
-      // Inserting the new record
-      connection.query(insertQuery, [userId, symbol, purchaseDate, purchaseTime, entry.low, numberOfShares], (err, insertResult) => {
+      if (addToWatchlist) {
+        const checkWatchlistQuery = 'SELECT 1 FROM watchlist WHERE user_id = ? AND stock_symbol = ?';
+        connection.query(checkWatchlistQuery, [userId, symbol], (err, results) => {
           if (err) {
-              console.error(err);
-              return res.status(500).json({ message: 'An error occurred during portfolio update' });
+            console.error(err);
+            return res.status(500).json({ message: 'An error occurred while checking the watchlist' });
           }
-          res.status(200).json({ message: 'Portfolio updated successfully' });
-      });
+          if (results.length === 0) {
+            const addWatchlistQuery = 'INSERT INTO watchlist (user_id, stock_symbol) VALUES (?, ?)';
+            connection.query(addWatchlistQuery, [userId, symbol], (err, results) => {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'An error occurred during watchlist update' });
+              }
+            });
+          }
+          updatePortfolio(userId, symbol, purchaseDate, purchaseTime, entry.low, numberOfShares, res);
+        });
+      } else {
+        updatePortfolio(userId, symbol, purchaseDate, purchaseTime, entry.low, numberOfShares, res);
+      }
   });
 });
 
-app.get('/fetch-portfolio', authenticateTokenMiddleware, (req, res) => {
+function updatePortfolio(userId, symbol, purchaseDate, purchaseTime, buyPrice, numberOfShares, res) {
+  const insertQuery = `
+      INSERT INTO portfolio (user_id, stock_symbol, purchase_date, purchase_time, buy_price, shares)
+      VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  connection.query(insertQuery, [userId, symbol, purchaseDate, purchaseTime, buyPrice, numberOfShares], (err, insertResult) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'An error occurred during portfolio update' });
+      }
+      res.status(200).json({ message: 'Portfolio updated successfully' });
+  });
+}
+
+
+
+app.get('/fetch-watchlist', authenticateTokenMiddleware, (req, res) => {
+  const { username } = req.user;
+  const query = `
+    SELECT w.id, w.stock_symbol
+    FROM users u
+    JOIN watchlist w ON u.id = w.user_id
+    WHERE u.username = ?
+  `;
+  
+  connection.query(query, [username], async (err, results) => {
+    if (err) {
+      console.error('Error fetching watchlist:', err);
+      return res.status(500).json({ message: 'Error fetching watchlist' });
+    }
+    const stockDetailsPromises = results.map((portfolioItem) => {
+      const url = `https://financialmodelingprep.com/api/v3/profile/${portfolioItem.stock_symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`;
+      return axios.get(url).then(response => ({
+        ...portfolioItem,
+        stockDetails: response.data
+      }));
+    });
+    const watchListWithDetails = await Promise.all(stockDetailsPromises);
+    res.json(watchListWithDetails);
+  });
+});
+
+
+app.get('/fetch-portfolio', authenticateTokenMiddleware, async (req, res) => {
   const { username } = req.user;
   const query = `
     SELECT p.id, p.stock_symbol, p.purchase_date, p.purchase_time, p.buy_price, p.shares
@@ -94,14 +252,43 @@ app.get('/fetch-portfolio', authenticateTokenMiddleware, (req, res) => {
     WHERE u.username = ?
   `;
 
-  connection.query(query, [username], (err, results) => {
-    if (err) {
-      console.error('Error fetching portfolio:', err);
-      return res.status(500).json({ message: 'Error fetching portfolio' });
-    }
+  try {
+    connection.query(query, [username], async (err, results) => {
+      if (err) {
+        console.error('Error fetching portfolio:', err);
+        return res.status(500).json({ message: 'Error fetching portfolio' });
+      }
 
-    res.json(results);
-  });
+      const stockDetailsPromises = results.map((portfolioItem) => {
+        const url = `https://financialmodelingprep.com/api/v3/profile/${portfolioItem.stock_symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`;
+        return axios.get(url).then(response => ({
+          ...portfolioItem,
+          stockDetails: response.data
+        }));
+      });
+
+      const portfolioWithDetails = await Promise.all(stockDetailsPromises);
+
+      res.json(portfolioWithDetails);
+    });
+  } catch (error) {
+    console.error('Error processing portfolio:', error);
+    res.status(500).json({ message: 'Error processing portfolio' });
+  }
+});
+
+
+app.get('/query-stock-information', async (req, res) => {
+  const { queryStockValue } = req.query;
+
+  try {
+    const response =  await  axios.get(`https://financialmodelingprep.com/api/v3/profile/${queryStockValue}?apikey=${process.env.STOCK_PRIVATE_KEY}`)
+    console.log(response.data)
+    res.json(response.data)
+  } catch (error) {
+    console.error('error while fetching data', error);
+    res.status(500).send('failed to fetch data');
+  }
 });
 
 app.get('/query-stock-data', async (req, res) => {
@@ -136,12 +323,11 @@ app.get('/get-symbol-information', async(req,res)=>{
 
 })
 
-//user registration
 app.post('/register', registerRoute);
-//user login
+
 app.post('/login', loginRoute);
 
-app.get('/authenticateToken', authenticateToken, holyPoggers);
+app.get('/authenticateToken', authenticateToken);
 
 app.get('/protected-route', authenticateToken, (req, res) => {
     res.status('This is a protected route');
@@ -178,76 +364,6 @@ app.get('/recovery', async (req, res) => {
         console.log(error)
     }
 });
-
-const storeItems = new Map([
-  [1, { priceInCents: 10000, name: "Learn React Today" }],
-  [2, { priceInCents: 20000, name: "Learn CSS Today" }],
-])
-
-app.post("/create-checkout-session", async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      line_items: req.body.items.map(item => {
-        const storeItem = storeItems.get(item.id)
-        return {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: storeItem.name,
-            },
-            unit_amount: storeItem.priceInCents,
-          },
-          quantity: item.quantity,
-        }
-      }),
-      success_url: `${process.env.SERVER_URL}/success.html`,
-      cancel_url: `${process.env.SERVER_URL}/cancel.html`,
-    })
-    res.json({ url: session.url })
-  } catch (e) {
-    res.status(500).json({ error: e.message })
-  }
-})
-
-
-app.get('/createKeys', async (req, res) => {
-    const { xpriv, numKeys, rootPrivateKey } = req.query;
-    const path = `m/44'/0'/0'/0/0`;
-
-    try {
-        if (!xpriv) {
-            return res.status(400).send("missing xpriv key");
-        }
-        if (!numKeys) { 
-            return res.status(400).send("missing numKeys");
-        }
-        const derivedKeys = [];
-        for (let i = 0; i < numKeys; i++) {
-            const rootNode = bip32.fromBase58(xpriv);
-            const childNode = rootNode.derivePath(`${path}/${i}`);
-            const publicKey = childNode.publicKey;
-            const privateKeyWIF = childNode.toWIF();
-            const publicKeyBuffer = Buffer.from(publicKey, 'hex');
-            const publicKeyHex = publicKeyBuffer.toString('hex');
-            const address = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer }).address;
-
-            derivedKeys.push({
-                address: address,
-                publicKey: publicKeyHex,
-                privateKey: privateKeyWIF
-            });
-        }
-        res.json(derivedKeys)
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Internal server error");
-    }
-});
-
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -11,6 +11,36 @@
     --foreground-rgb: 255, 255, 255;
   }
 }
+.responsive-title {
+  font-size: 60px;
+  font-weight: bold;
+}
+
+@media (min-width: 640px) {
+  .responsive-title {
+      font-size: 60px;
+  }
+}
+
+/* Medium screens */
+@media (min-width: 768px) { /* equivalent to md: in Tailwind */
+  .responsive-title {
+      font-size: 72px; /* equivalent to text-6xl in Tailwind */
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  .responsive-title {
+      font-size: 84px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .responsive-title {
+      font-size: 96px; 
+  }
+}
 
 body {
   color: black;
@@ -18,11 +48,23 @@ body {
 title-font-size {
   font-size: ;
 }
+.sign-in-box {
+  height: 65vh;
+  width: 25vw;
+}
 .ow-background {
+  background-color: #f9f9f9;
+  position: relative;
+  height: 100vh;
+  z-index: 0;
+}
+.ow-background-1 {
   background-color: #f9f9f9;
   position: relative;
   z-index: 0;
 }
+
+
 .search-bar-width {
   width: 48vw
 }
@@ -30,21 +72,54 @@ title-font-size {
   height: auto;
   max-height: 68vh;
   display: inline-block;
+  
 }
 
 .graph-height {
   height: 50vh;
 }
 
+.box-shadow-watchlist {
+  box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.02);
+}
 .search-result {
+  width: 47vw;
+  height: 12vh;
+  box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.1);
+  border-style: none;
+}
+.search-result-1 {
   width: 48vw;
+  height: 12vh;
+  box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.05);
+  border-style: none;
+}
+.search-space {
+  width: 6vw;
+}
+.search-space-1 {
+  width: 10vw;
+}
+.search-result-chart {
+  height: 50vh;
+  width: 47vw;
+  box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.1);
+  border-style: none;
+}
+
+.search-result-chart-1 {
+  height: 50vh;
+  width: 48vw;
+  border-style: none;
 }
 
 .stock-information-query-box {
-  height: 84vh;
-
+  height: 72vh;
 }
-
+.add-shares-box-width {
+  width: 18vw;
+  height: 6vh;
+}
 .stock-information-box {
   width: 48vw;
 }
@@ -56,6 +131,73 @@ title-font-size {
   height: 75vh;
   width: 22vw;
 }
+.watch-list-content{
+  height: 8vh;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 
 @layer utilities {
   .text-balance {
@@ -68,6 +210,8 @@ title-font-size {
   --color-bg2: rgb(86, 120, 253);
   --color-bg1-1: rgb(100, 255, 146);
   --color-bg2-1: rgb(86, 233, 253);
+  --color-bg1-2: rgb(173, 51, 255);
+  --color-bg2-2: rgb(255, 124, 124);
   --color1: 18, 113, 255;
   --color2: 221, 74, 255;
   --color3: 100, 220, 255;
@@ -228,3 +372,15 @@ title-font-size {
   transform: skewY(-10deg);
 }
 
+.gradient-bg-2 {
+  position: absolute;
+  overflow: hidden;
+  background: linear-gradient(80deg, var(--color-bg1-2), var(--color-bg2-2));
+  top: 40vh;
+  left:0;
+  width: 100%;
+  height: 80vh;
+  z-index:-1;
+  transform-origin: top right;
+  transform: skewY(10deg);
+}
