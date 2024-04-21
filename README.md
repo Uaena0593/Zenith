@@ -14,6 +14,9 @@
 - Redis
 
 # Project Walkthrough
+![Create Next App (1)](https://github.com/Uaena0593/investment-portfolio-zenith/assets/86070045/42b39230-0ddb-4710-b625-1245b08cba50)
+- Register using token authentication here
+
 
 
 ## Running Locally
