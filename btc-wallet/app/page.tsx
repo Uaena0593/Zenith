@@ -1,9 +1,7 @@
 'use client';
 import React from 'react';
 import Link from "next/link";
-import Image from "next/image";
 import NavBar from './components/NavBar';
-import blockchainPNG from './public/image (1).png';
 import './globals.css';
 
 

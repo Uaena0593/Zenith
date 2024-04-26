@@ -27,7 +27,10 @@ const CreateAccount = () => {
       if (response.status === 201) {
         router.push('/landingpage')
       };
-    } catch (error) {
+    } catch (error ) {
+      if (error.response.status === 409) {
+        alert('Username taken');
+      }
       console.log(error);
     }
   };

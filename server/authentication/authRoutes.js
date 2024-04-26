@@ -1,14 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const mysql = require('mysql');
+const { connection } = require('../config/mysql')
 require('dotenv').config();
-
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: process.env.DATABASE_CONNECTION_PW,
-    database: 'btcwallet'
-});
 
 function generateAccessToken(username) {
     return jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' });
@@ -22,13 +15,11 @@ function authenticateToken(req, res) {
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        res.json("authenticated")
+        res.json("authenticated");
     } catch (err) {
         return res.status(403).send('Invalid token');
     }
 }
-
-
 
 const registerRoute = async (req, res) => {
     try {
@@ -36,7 +27,10 @@ const registerRoute = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         connection.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (error, results) => {
-            if (error) {
+            if (error ) {
+                if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
+                    return res.status(409).send('Username already taken'); // 409 Conflict
+                }
                 console.error(error);
                 return res.status(500).send('Error registering user');
             }
@@ -48,6 +42,15 @@ const registerRoute = async (req, res) => {
         console.error(error);
         res.status(500).send('Error registering user');
     }
+};
+
+const logout = async (req, res) => {
+    res.cookie("accessToken", "", {
+      expires: new Date(0),
+      httpOnly: true,
+      sameSite: "strict",
+    });
+    res.send("Logged out");
 };
 
 
@@ -79,4 +82,4 @@ const loginRoute = async (req, res) => {
     });
 };
 
-module.exports = { registerRoute, loginRoute, authenticateToken};
+module.exports = { registerRoute, loginRoute, authenticateToken, logout };
