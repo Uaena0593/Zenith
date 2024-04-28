@@ -60,6 +60,7 @@ app.get("/fetch-portfolio", authenticateTokenMiddleware, fetchPortfolio);
 app.get("/query-stock-information", queryStockInfo);
 
 app.get("/query-stock-data", queryStockData);
+
 app.get("/get-symbol-information", async (req, res) => {
   const { symbol } = req.query;
   const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`;
