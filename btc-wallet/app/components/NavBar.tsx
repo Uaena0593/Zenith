@@ -47,6 +47,9 @@ const NavBar = () => {
             <li>
               <Link href="/register">Resources</Link>
             </li>
+            <li>
+              <Link href="/publicportfolios">Public Portfolios</Link>
+            </li>
           </ul>
         </div>
         <div className = "flex items-center">

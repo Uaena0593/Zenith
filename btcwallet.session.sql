@@ -27,6 +27,10 @@ create TABLE watchlist (
     stock_symbol VARCHAR(10) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+--@block
+ALTER TABLE portfolio
+ADD COLUMN is_public BOOLEAN DEFAULT FALSE;
 -- @block
 DROP TABLE watchlist;
 

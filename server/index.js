@@ -6,7 +6,8 @@ const {
   fetchPortfolioData,
   checkPortfolioExist,
   addToPortfolio,
-  fetchPortfolio
+  fetchPortfolio,
+  changePortfolioStatus
 } = require("./controllers/portfolioController");
 const { fetchStockChart, queryStockInfo, queryStockData } = require("./controllers/stockInfoController");
 const { updateBuyPrice, fetchWatchlist } = require("./controllers/userController");
@@ -23,6 +24,7 @@ const app = express();
 require("dotenv").config();
 
 app.use(express.json());
+
 const corsOptions = {
   origin: "http://localhost:3000",
   credentials: true,
@@ -82,6 +84,9 @@ app.get("/protected-route", authenticateToken, (req, res) => {
 });
 
 app.get("/logout", logout);
+
+app.post('/change-portfolio-status', authenticateTokenMiddleware, changePortfolioStatus);
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

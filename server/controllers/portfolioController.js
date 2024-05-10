@@ -37,14 +37,14 @@ const fetchPortfolio = async (req, res) => {
       JOIN portfolio p ON u.id = p.user_id
       WHERE u.username = ?
     `;
-  
+
     try {
       connection.query(query, [username], async (err, results) => {
         if (err) {
           console.error("Error fetching portfolio:", err);
           return res.status(500).json({ message: "Error fetching portfolio" });
         }
-  
+
         const stockDetailsPromises = results.map((portfolioItem) => {
           const url = `https://financialmodelingprep.com/api/v3/profile/${portfolioItem.stock_symbol}?apikey=${process.env.STOCK_PRIVATE_KEY}`;
           return axios.get(url).then((response) => ({
@@ -52,7 +52,7 @@ const fetchPortfolio = async (req, res) => {
             stockDetails: response.data,
           }));
         });
-  
+
         const portfolioWithDetails = await Promise.all(stockDetailsPromises);
   
         res.json(portfolioWithDetails);
@@ -297,4 +297,24 @@ const fetchPortfolioData = async (req, res) => {
   }
 };
 
-module.exports = { fetchPortfolioData, checkPortfolioExist, addToPortfolio, fetchPortfolio };
+const changePortfolioStatus = async (req, res) => {
+  const { username } = req.user;
+  if (typeof user_id !== 'number' || typeof is_public !== 'boolean') {
+    return res.status(400).send('Invalid input data');
+  }
+
+  const sql = `
+      UPDATE portfolio
+      SET is_public = ?
+      WHERE user_id = ?;
+  `;
+
+  connection.query(sql, [is_public, user_id], (error, results) => {
+      if (error) {
+          return res.status(500).send('Failed to update the portfolio');
+      }
+      res.send(`Updated ${results.affectedRows} rows`);
+  });
+}
+
+module.exports = { fetchPortfolioData, checkPortfolioExist, addToPortfolio, fetchPortfolio, changePortfolioStatus };

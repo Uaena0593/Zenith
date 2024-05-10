@@ -46,9 +46,9 @@ const registerRoute = async (req, res) => {
 
 const logout = async (req, res) => {
     res.cookie("accessToken", "", {
-      expires: new Date(0),
-      httpOnly: true,
-      sameSite: "strict",
+        expires: new Date(0),
+        httpOnly: true,
+        sameSite: "strict",
     });
     res.send("Logged out");
 };

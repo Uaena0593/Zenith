@@ -10,7 +10,7 @@ const SignIn = () => {
     const router = useRouter();
     useEffect(() => {
         const checkAuth = async () => {
-          const response = await axios.get("http://localhost:8000/authenticateToken", {withCredentials: true});
+          const response = await axios.get("http://localhost:8000/authenticateToken", { withCredentials: true });
           if (response.data == "authenticated") {
             router.push('/landingpage')
           }
